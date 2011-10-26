@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+$: << File.dirname(__FILE__) + '/../lib'
+require File.dirname(__FILE__) + '/../src/dartx'
+require 'optparse'
+
+dart_opt = {:quiet => false, :wait => true, :anim => true}
+opts = OptionParser.new
+opts.on('-q', '--quiet', '') {|v| dart_opt[:quiet] = true}
+opts.on('-w', '--wait', '') {|v| dart_opt[:wait] = true}
+opts.on('-W', '--no-wait', '') {|v| dart_opt[:wait] = false}
+#opts.on('-a', '--anim', '') {|v| dart_opt[:anim] = true}
+#opts.on('-A', '--no-anim', '') {|v| dart_opt[:anim] = false}
+opts.on_tail('-h', '--help', 'Show this message') {|v| puts(opts.help); exit}
+opts.parse!(ARGV)
+
+filename = ARGV.shift
+if filename.nil?
+  error = nil
+  unless dart_opt[:wait]
+    dart_opt[:wait] = true
+    error = 'no-wait'
+  end
+  if dart_opt[:quiet]
+    dart_opt[:quiet] = false
+    error = 'quiet'
+  end
+  if error
+    puts "#{error} option is not allowed for the interaction-mode.\n[Push any key]"
+    STDIN.getc
+  end
+end
+dart = Dart.new filename
+dart.start dart_opt
